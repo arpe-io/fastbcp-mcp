@@ -170,7 +170,9 @@ class TestSourceConnectionConfig:
     def test_invalid_connection_no_auth(self):
         """Test that connection without authentication fails."""
         with pytest.raises(ValidationError) as exc_info:
-            SourceConnectionConfig(type="pgsql", server="localhost:5432", database="testdb")
+            SourceConnectionConfig(
+                type="pgsql", server="localhost:5432", database="testdb"
+            )
         errors = exc_info.value.errors()
         assert any(
             "user" in str(e) or "authentication" in str(e).lower() for e in errors
