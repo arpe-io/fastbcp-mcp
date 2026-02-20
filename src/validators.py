@@ -222,9 +222,7 @@ class OutputConfig(BaseModel):
         None, description="Decimal separator for numeric values"
     )
     date_format: Optional[str] = Field(None, description="Date format string")
-    bool_format: Optional[BoolFormat] = Field(
-        None, description="Boolean output format"
-    )
+    bool_format: Optional[BoolFormat] = Field(None, description="Boolean output format")
     parquet_compression: Optional[ParquetCompression] = Field(
         None, description="Parquet compression algorithm"
     )
@@ -244,27 +242,21 @@ class OutputConfig(BaseModel):
     def validate_parquet_compression(self):
         """Validate parquet_compression is only used with parquet format."""
         if self.parquet_compression and self.format != OutputFormat.PARQUET:
-            raise ValueError(
-                "parquet_compression can only be used with parquet format"
-            )
+            raise ValueError("parquet_compression can only be used with parquet format")
         return self
 
     @model_validator(mode="after")
     def validate_delimiter_format(self):
         """Validate delimiter is only meaningful for CSV/TSV."""
         if self.delimiter and self.format not in (OutputFormat.CSV, OutputFormat.TSV):
-            raise ValueError(
-                "delimiter is only meaningful for csv or tsv formats"
-            )
+            raise ValueError("delimiter is only meaningful for csv or tsv formats")
         return self
 
     @model_validator(mode="after")
     def validate_no_header_format(self):
         """Validate no_header is only meaningful for CSV/TSV."""
         if self.no_header and self.format not in (OutputFormat.CSV, OutputFormat.TSV):
-            raise ValueError(
-                "no_header is only meaningful for csv or tsv formats"
-            )
+            raise ValueError("no_header is only meaningful for csv or tsv formats")
         return self
 
 
@@ -302,9 +294,7 @@ class ExportOptions(BaseModel):
     log_level: Optional[LogLevel] = Field(None, description="Override log level")
     no_banner: bool = Field(False, description="Suppress the FastBCP banner")
     license_path: Optional[str] = Field(None, description="Path or URL to license file")
-    cloud_profile: Optional[str] = Field(
-        None, description="Cloud storage profile name"
-    )
+    cloud_profile: Optional[str] = Field(None, description="Cloud storage profile name")
 
     @model_validator(mode="after")
     def validate_distribute_key_requirements(self):

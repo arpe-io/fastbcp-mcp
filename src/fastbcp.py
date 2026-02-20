@@ -84,19 +84,13 @@ class CommandBuilder:
     def _validate_binary(self) -> None:
         """Validate that FastBCP binary exists and is executable."""
         if not self.binary_path.exists():
-            raise FastBCPError(
-                f"FastBCP binary not found at: {self.binary_path}"
-            )
+            raise FastBCPError(f"FastBCP binary not found at: {self.binary_path}")
 
         if not self.binary_path.is_file():
-            raise FastBCPError(
-                f"FastBCP path is not a file: {self.binary_path}"
-            )
+            raise FastBCPError(f"FastBCP path is not a file: {self.binary_path}")
 
         if not os.access(self.binary_path, os.X_OK):
-            raise FastBCPError(
-                f"FastBCP binary is not executable: {self.binary_path}"
-            )
+            raise FastBCPError(f"FastBCP binary is not executable: {self.binary_path}")
 
     def build_command(self, request: ExportRequest) -> List[str]:
         """
@@ -396,9 +390,7 @@ class CommandBuilder:
 
         except subprocess.TimeoutExpired as e:
             logger.error(f"FastBCP execution timed out after {timeout}s")
-            raise FastBCPError(
-                f"Execution timed out after {timeout} seconds"
-            ) from e
+            raise FastBCPError(f"Execution timed out after {timeout} seconds") from e
 
         except Exception as e:
             logger.error(f"FastBCP execution failed: {e}")
@@ -450,33 +442,86 @@ def get_supported_formats() -> Dict[str, Any]:
     return {
         "Database Sources": {
             "PostgreSQL (pgsql, pgcopy)": [
-                "csv", "tsv", "json", "bson", "parquet", "xlsx", "binary",
+                "csv",
+                "tsv",
+                "json",
+                "bson",
+                "parquet",
+                "xlsx",
+                "binary",
             ],
             "SQL Server (mssql, msoledbsql, odbc, oledb)": [
-                "csv", "tsv", "json", "bson", "parquet", "xlsx", "binary",
+                "csv",
+                "tsv",
+                "json",
+                "bson",
+                "parquet",
+                "xlsx",
+                "binary",
             ],
             "Oracle (oraodp)": [
-                "csv", "tsv", "json", "bson", "parquet", "xlsx", "binary",
+                "csv",
+                "tsv",
+                "json",
+                "bson",
+                "parquet",
+                "xlsx",
+                "binary",
             ],
             "MySQL (mysql)": [
-                "csv", "tsv", "json", "bson", "parquet", "xlsx", "binary",
+                "csv",
+                "tsv",
+                "json",
+                "bson",
+                "parquet",
+                "xlsx",
+                "binary",
             ],
             "Netezza (nzcopy, nzoledb, nzsql)": [
-                "csv", "tsv", "json", "bson", "parquet", "xlsx", "binary",
+                "csv",
+                "tsv",
+                "json",
+                "bson",
+                "parquet",
+                "xlsx",
+                "binary",
             ],
             "ClickHouse (clickhouse)": [
-                "csv", "tsv", "json", "bson", "parquet", "xlsx", "binary",
+                "csv",
+                "tsv",
+                "json",
+                "bson",
+                "parquet",
+                "xlsx",
+                "binary",
             ],
             "SAP HANA (hana)": [
-                "csv", "tsv", "json", "bson", "parquet", "xlsx", "binary",
+                "csv",
+                "tsv",
+                "json",
+                "bson",
+                "parquet",
+                "xlsx",
+                "binary",
             ],
             "Teradata (teradata)": [
-                "csv", "tsv", "json", "bson", "parquet", "xlsx", "binary",
+                "csv",
+                "tsv",
+                "json",
+                "bson",
+                "parquet",
+                "xlsx",
+                "binary",
             ],
         },
         "Output Formats": ["csv", "tsv", "json", "bson", "parquet", "xlsx", "binary"],
         "Storage Targets": [
-            "local", "s3", "s3compatible", "azure_blob", "azure_datalake", "fabric_onelake",
+            "local",
+            "s3",
+            "s3compatible",
+            "azure_blob",
+            "azure_datalake",
+            "fabric_onelake",
         ],
     }
 

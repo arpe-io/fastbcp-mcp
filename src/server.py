@@ -854,9 +854,7 @@ def _build_export_explanation(request: ExportRequest) -> str:
     # Output format and destination
     output = request.output
     dest = output.file_output or output.directory or "(not specified)"
-    parts.append(
-        f"Export to {output.format.value.upper()} format: {dest}"
-    )
+    parts.append(f"Export to {output.format.value.upper()} format: {dest}")
 
     # Storage target
     if output.storage_target.value != "local":

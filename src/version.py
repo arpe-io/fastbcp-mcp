@@ -185,9 +185,7 @@ class VersionDetector:
                 check=False,
             )
             output = (result.stdout + result.stderr).strip()
-            match = re.search(
-                r"FastBCP\s+Version\s+(\d+)\.(\d+)\.(\d+)\.(\d+)", output
-            )
+            match = re.search(r"FastBCP\s+Version\s+(\d+)\.(\d+)\.(\d+)\.(\d+)", output)
             if match:
                 self._detected_version = FastBCPVersion(
                     major=int(match.group(1)),
