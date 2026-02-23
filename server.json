@@ -1,7 +1,7 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.arpe-io/fastbcp-mcp",
-  "description": "MCP server for FastBCP — high-performance parallel database export to CSV, Parquet, JSON, XLSX and BSON, with support for local storage and cloud targets (S3, Azure Blob, ADLS, GCS, OneLake). Sources include PostgreSQL, SQL Server, Oracle, MySQL, ClickHouse, SAP HANA and 80+ compatible databases.",
+  "description": "MCP server for FastBCP — high-performance parallel database export to files and cloud",
   "repository": {
     "url": "https://github.com/arpe-io/fastbcp-mcp",
     "source": "github"
