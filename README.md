@@ -1,6 +1,6 @@
 # FastBCP MCP Server
 
-<!-- mcp-name: io.github.aetperf/fastbcp-mcp -->
+<!-- mcp-name: io.github.arpe-io/fastbcp-mcp -->
 
 A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that exposes [FastBCP](https://fastbcp.arpe.io/docs/latest/) functionality for exporting data from databases to files (CSV, TSV, JSON, BSON, Parquet, XLSX, Binary) with optional cloud storage targets.
 
