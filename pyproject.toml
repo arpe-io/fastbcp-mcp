@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "fastbcp-mcp"
-version = "0.1.1"
+version = "0.1.2"
 description = "A Model Context Protocol (MCP) server for FastBCP, enabling efficient data export from databases to files."
 readme = "README.md"
 license = "MIT"
