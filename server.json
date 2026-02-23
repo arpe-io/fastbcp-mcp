@@ -1,0 +1,36 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.arpe-io/fastbcp-mcp",
+  "description": "MCP server for FastBCP — high-performance parallel database export to CSV, Parquet, JSON, XLSX and BSON, with support for local storage and cloud targets (S3, Azure Blob, ADLS, GCS, OneLake). Sources include PostgreSQL, SQL Server, Oracle, MySQL, ClickHouse, SAP HANA and 80+ compatible databases.",
+  "repository": {
+    "url": "https://github.com/arpe-io/fastbcp-mcp",
+    "source": "github"
+  },
+  "version": "0.1.1",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "fastbcp-mcp",
+      "version": "0.1.1",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "description": "Path to the FastBCP binary",
+          "isRequired": true,
+          "format": "string",
+          "isSecret": false,
+          "name": "FASTBCP_PATH"
+        },
+        {
+          "description": "Execution timeout in seconds (default: 1800)",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": false,
+          "name": "FASTBCP_TIMEOUT"
+        }
+      ]
+    }
+  ]
+}
