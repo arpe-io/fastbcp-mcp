@@ -1,6 +1,16 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+All notable changes to the FastBCP MCP Server will be documented in this file.
+
+## [0.1.1] - 2026-02-23
+
+### Added
+
+- `server.json` MCP Registry configuration file with package metadata, transport settings, and environment variable definitions
+
+### Changed
+
+- GitHub repository URL updated from `aetperf/fastbcp-mcp` to `arpe-io/fastbcp-mcp` in `pyproject.toml`
 
 ## [0.1.0] - 2026-02-20
 
