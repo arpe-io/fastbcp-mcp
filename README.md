@@ -2,6 +2,10 @@
 
 <!-- mcp-name: io.github.arpe-io/fastbcp-mcp -->
 
+[![PyPI](https://img.shields.io/pypi/v/fastbcp-mcp)](https://pypi.org/project/fastbcp-mcp/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![MCP Registry](https://img.shields.io/badge/MCP-Registry-blue)](https://registry.modelcontextprotocol.io/?q=arpe-io)
+
 A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that exposes [FastBCP](https://fastbcp.arpe.io/docs/latest/) functionality for exporting data from databases to files (CSV, TSV, JSON, BSON, Parquet, XLSX, Binary) with optional cloud storage targets.
 
 ## Overview
