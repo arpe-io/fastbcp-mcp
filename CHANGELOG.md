@@ -2,6 +2,17 @@
 
 All notable changes to the FastBCP MCP Server will be documented in this file.
 
+## [0.1.3] - 2026-02-24
+
+### Added
+- PyPI, License, and MCP Registry badges in README
+- GitHub Actions workflow for automated PyPI publishing on release
+- Missing environment variables (`FASTBCP_LOG_DIR`, `LOG_LEVEL`) in server.json
+- GitHub repository topics for MCP Registry discoverability
+
+### Fixed
+- Documentation URL in pyproject.toml
+
 ## [0.1.1] - 2026-02-23
 
 ### Added
