@@ -40,9 +40,9 @@ dev = [
 fastbcp-mcp = "src.server:main"
 
 [project.urls]
-Homepage = "https://fastbcp.arpe.io/docs/latest/"
-Repository = "https://github.com/aetperf/fastbcp-mcp"
-Issues = "https://github.com/aetperf/fastbcp-mcp/issues"
+Homepage = "https://fastbcp-docs.arpe.io/latest/"
+Repository = "https://github.com/arpe-io/fastbcp-mcp"
+Issues = "https://github.com/arpe-io/fastbcp-mcp/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src"]
