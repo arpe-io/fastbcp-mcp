@@ -29,6 +29,16 @@
           "format": "string",
           "isSecret": false,
           "name": "FASTBCP_TIMEOUT"
+        },
+        {
+          "description": "Directory for execution logs (default: ./logs)",
+          "format": "string",
+          "name": "FASTBCP_LOG_DIR"
+        },
+        {
+          "description": "Logging level: DEBUG, INFO, WARNING, ERROR (default: INFO)",
+          "format": "string",
+          "name": "LOG_LEVEL"
         }
       ]
     }
