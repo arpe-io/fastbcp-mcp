@@ -57,6 +57,7 @@ from src.fastbcp import (
     get_supported_formats,
     suggest_parallelism_method,
 )
+from src.version import check_version_compatibility
 
 
 # Load environment variables
@@ -468,6 +469,13 @@ async def handle_preview_export(arguments: Dict[str, Any]) -> list[TextContent]:
         # Validate and parse request
         request = ExportRequest(**arguments)
 
+        # Check version compatibility
+        version_warnings = check_version_compatibility(
+            arguments,
+            command_builder.version_detector.capabilities,
+            command_builder.version_detector._detected_version,
+        )
+
         # Build command
         command = command_builder.build_command(request)
 
@@ -483,6 +491,15 @@ async def handle_preview_export(arguments: Dict[str, Any]) -> list[TextContent]:
             "",
             "## What this command will do:",
             explanation,
+        ]
+
+        if version_warnings:
+            response.append("")
+            response.append("## \u26a0 Version Compatibility Warnings")
+            for warning in version_warnings:
+                response.append(f"- {warning}")
+
+        response += [
             "",
             "## Command (passwords masked):",
             "```bash",

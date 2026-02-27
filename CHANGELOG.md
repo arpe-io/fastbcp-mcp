@@ -2,6 +2,11 @@
 
 All notable changes to the FastBCP MCP Server will be documented in this file.
 
+## [0.1.4] - 2026-02-27
+
+### Added
+- Version compatibility check infrastructure in `preview_export_command` output
+
 ## [0.1.3] - 2026-02-24
 
 ### Added
