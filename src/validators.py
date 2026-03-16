@@ -53,6 +53,7 @@ class ParallelismMethod(str, Enum):
     RANDOM = "Random"  # Random distribution using modulo
     RANGE_ID = "RangeId"  # Numeric range distribution
     ROWID = "Rowid"  # Oracle-specific
+    TIMEPARTITION = "Timepartition"  # Time-based partitioning for temporal data
 
 
 class StorageTarget(str, Enum):
@@ -64,6 +65,7 @@ class StorageTarget(str, Enum):
     AZURE_BLOB = "azure_blob"
     AZURE_DATALAKE = "azure_datalake"
     FABRIC_ONELAKE = "fabric_onelake"
+    GCS = "gcs"
 
 
 class ParquetCompression(str, Enum):
@@ -304,6 +306,7 @@ class ExportOptions(BaseModel):
             ParallelismMethod.RANDOM,
             ParallelismMethod.RANGE_ID,
             ParallelismMethod.NTILE,
+            ParallelismMethod.TIMEPARTITION,
         }
 
         if self.method in methods_requiring_key and not self.distribute_key_column:

@@ -38,18 +38,23 @@ class CommandBuilder:
 
         Args:
             binary_path: Path to the FastBCP binary
-
-        Raises:
-            FastBCPError: If binary doesn't exist or isn't executable
         """
         self.binary_path = Path(binary_path)
+        self._preview_only = False
         self._validate_binary()
-        self._version_detector = VersionDetector(str(self.binary_path))
-        detected = self._version_detector.detect()
-        if detected:
-            logger.info(f"FastBCP version {detected} detected")
+        if self._preview_only:
+            # Skip version detection; use latest known capabilities as fallback
+            self._version_detector = VersionDetector(str(self.binary_path))
+            # Mark detection as done with no result so capabilities falls back to latest
+            self._version_detector._detection_done = True
+            logger.info("Running in preview-only mode (binary not found)")
         else:
-            logger.warning("Could not detect FastBCP version")
+            self._version_detector = VersionDetector(str(self.binary_path))
+            detected = self._version_detector.detect()
+            if detected:
+                logger.info(f"FastBCP version {detected} detected")
+            else:
+                logger.warning("Could not detect FastBCP version")
 
     @property
     def version_detector(self) -> VersionDetector:
@@ -61,11 +66,34 @@ class CommandBuilder:
 
         Returns:
             Dict with version string, detection status, binary path, and capabilities.
+            When in preview-only mode, includes a message and preview_only flag.
         """
+        if self._preview_only:
+            caps = self._version_detector.capabilities
+            return {
+                "preview_only": True,
+                "version": None,
+                "detected": False,
+                "binary_path": str(self.binary_path),
+                "message": "Binary not found. Install from https://arpe.io",
+                "capabilities": {
+                    "source_types": sorted(caps.source_types),
+                    "output_formats": sorted(caps.output_formats),
+                    "parallelism_methods": sorted(caps.parallelism_methods),
+                    "storage_targets": sorted(caps.storage_targets),
+                    "supports_nobanner": caps.supports_nobanner,
+                    "supports_version_flag": caps.supports_version_flag,
+                    "supports_cloud_profile": caps.supports_cloud_profile,
+                    "supports_merge": caps.supports_merge,
+                    "supports_config_file": caps.supports_config_file,
+                },
+            }
+
         detected = self._version_detector.detect()
         caps = self._version_detector.capabilities
 
         return {
+            "preview_only": False,
             "version": str(detected) if detected else None,
             "detected": detected is not None,
             "binary_path": str(self.binary_path),
@@ -78,26 +106,48 @@ class CommandBuilder:
                 "supports_version_flag": caps.supports_version_flag,
                 "supports_cloud_profile": caps.supports_cloud_profile,
                 "supports_merge": caps.supports_merge,
+                "supports_config_file": caps.supports_config_file,
             },
         }
 
     def _validate_binary(self) -> None:
-        """Validate that FastBCP binary exists and is executable."""
+        """Validate that FastBCP binary exists and is executable.
+
+        If the binary is not found, sets preview-only mode instead of raising.
+        """
         if not self.binary_path.exists():
-            raise FastBCPError(f"FastBCP binary not found at: {self.binary_path}")
+            logger.warning(
+                f"FastBCP binary not found at: {self.binary_path}. "
+                "Entering preview-only mode. Install from https://arpe.io"
+            )
+            self._preview_only = True
+            return
 
         if not self.binary_path.is_file():
-            raise FastBCPError(f"FastBCP path is not a file: {self.binary_path}")
+            logger.warning(
+                f"FastBCP path is not a file: {self.binary_path}. "
+                "Entering preview-only mode. Install from https://arpe.io"
+            )
+            self._preview_only = True
+            return
 
         if not os.access(self.binary_path, os.X_OK):
-            raise FastBCPError(f"FastBCP binary is not executable: {self.binary_path}")
+            logger.warning(
+                f"FastBCP binary is not executable: {self.binary_path}. "
+                "Entering preview-only mode. Install from https://arpe.io"
+            )
+            self._preview_only = True
+            return
 
-    def build_command(self, request: ExportRequest) -> List[str]:
+    def build_command(
+        self, request: ExportRequest, config_file: Optional[str] = None
+    ) -> List[str]:
         """
         Build a FastBCP command from a validated request.
 
         Args:
             request: Validated export request
+            config_file: Optional path to a YAML config file
 
         Returns:
             Command as list of strings (suitable for subprocess)
@@ -112,6 +162,10 @@ class CommandBuilder:
 
         # Add export options
         cmd.extend(self._build_option_params(request.options))
+
+        # Add config file if provided
+        if config_file:
+            cmd.extend(["--config", config_file])
 
         return cmd
 
@@ -226,7 +280,16 @@ class CommandBuilder:
 
         # Distribute key column
         if options.distribute_key_column:
-            params.extend(["--distributeKeyColumn", options.distribute_key_column])
+            if options.method.value == "Timepartition":
+                # Timepartition uses a special tuple format: (datecolumn, year, month)
+                col = options.distribute_key_column
+                params.extend(
+                    ["--distributeKeyColumn", f"({col}, year, month)"]
+                )
+            else:
+                params.extend(
+                    ["--distributeKeyColumn", options.distribute_key_column]
+                )
 
         # Degree of parallelism
         params.extend(["--degree", str(options.degree)])
@@ -355,6 +418,12 @@ class CommandBuilder:
             subprocess.TimeoutExpired: If execution exceeds timeout
             FastBCPError: If execution fails
         """
+        if self._preview_only:
+            raise FastBCPError(
+                f"Server is in preview-only mode (binary not found at {self.binary_path}). "
+                "Install the binary from https://arpe.io to enable execution."
+            )
+
         start_time = datetime.now()
 
         # Log command execution (with masked passwords)

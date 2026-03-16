@@ -83,13 +83,20 @@ app = Server("fastbcp")
 # Global command builder instance
 try:
     command_builder = CommandBuilder(FASTBCP_PATH)
-    version_info = command_builder.get_version()
-    logger.info(f"FastBCP binary found at: {FASTBCP_PATH}")
-    if version_info["detected"]:
-        logger.info(f"FastBCP version: {version_info['version']}")
+    if command_builder._preview_only:
+        logger.warning(
+            f"FastBCP binary not found at: {FASTBCP_PATH}. "
+            "Server running in preview-only mode. "
+            "Install the binary from https://arpe.io to enable execution."
+        )
     else:
-        logger.warning("FastBCP version could not be detected")
-except FastBCPError as e:
+        version_info = command_builder.get_version()
+        logger.info(f"FastBCP binary found at: {FASTBCP_PATH}")
+        if version_info["detected"]:
+            logger.info(f"FastBCP version: {version_info['version']}")
+        else:
+            logger.warning("FastBCP version could not be detected")
+except Exception as e:
     logger.error(f"Failed to initialize CommandBuilder: {e}")
     command_builder = None
 
@@ -299,6 +306,10 @@ async def list_tools() -> list[Tool]:
                             },
                         },
                     },
+                    "config_file": {
+                        "type": "string",
+                        "description": "Path to a YAML configuration file (--config parameter, requires FastBCP 0.30+)",
+                    },
                 },
                 "required": ["source", "output"],
             },
@@ -458,14 +469,17 @@ async def handle_preview_export(arguments: Dict[str, Any]) -> list[TextContent]:
             TextContent(
                 type="text",
                 text=(
-                    "Error: FastBCP binary not found or not accessible.\n"
-                    f"Expected location: {FASTBCP_PATH}\n"
+                    "Error: FastBCP server failed to initialize.\n"
+                    f"Expected binary location: {FASTBCP_PATH}\n"
                     "Please set FASTBCP_PATH environment variable correctly."
                 ),
             )
         ]
 
     try:
+        # Extract config_file before passing to ExportRequest (not part of the model)
+        config_file = arguments.pop("config_file", None)
+
         # Validate and parse request
         request = ExportRequest(**arguments)
 
@@ -477,7 +491,7 @@ async def handle_preview_export(arguments: Dict[str, Any]) -> list[TextContent]:
         )
 
         # Build command
-        command = command_builder.build_command(request)
+        command = command_builder.build_command(request, config_file=config_file)
 
         # Format for display (with masked passwords)
         display_command = command_builder.format_command_display(command, mask=True)
@@ -489,13 +503,25 @@ async def handle_preview_export(arguments: Dict[str, Any]) -> list[TextContent]:
         response = [
             "# FastBCP Command Preview",
             "",
+        ]
+
+        if command_builder._preview_only:
+            response += [
+                "**NOTE: Server is in preview-only mode** (binary not found at "
+                f"{command_builder.binary_path}). "
+                "Command preview is available but execution is disabled. "
+                "Install the binary from https://arpe.io to enable execution.",
+                "",
+            ]
+
+        response += [
             "## What this command will do:",
             explanation,
         ]
 
         if version_warnings:
             response.append("")
-            response.append("## \u26a0 Version Compatibility Warnings")
+            response.append("## Version Compatibility Warnings")
             for warning in version_warnings:
                 response.append(f"- {warning}")
 
@@ -547,7 +573,18 @@ async def handle_execute_export(arguments: Dict[str, Any]) -> list[TextContent]:
         return [
             TextContent(
                 type="text",
-                text="Error: FastBCP binary not found. Please check FASTBCP_PATH.",
+                text="Error: FastBCP server failed to initialize. Please check FASTBCP_PATH.",
+            )
+        ]
+
+    if command_builder._preview_only:
+        return [
+            TextContent(
+                type="text",
+                text=(
+                    f"Server is in preview-only mode (binary not found at {command_builder.binary_path}). "
+                    "Install the binary from https://arpe.io to enable execution."
+                ),
             )
         ]
 
@@ -807,8 +844,8 @@ async def handle_get_version(arguments: Dict[str, Any]) -> list[TextContent]:
             TextContent(
                 type="text",
                 text=(
-                    "Error: FastBCP binary not found or not accessible.\n"
-                    f"Expected location: {FASTBCP_PATH}\n"
+                    "Error: FastBCP server failed to initialize.\n"
+                    f"Expected binary location: {FASTBCP_PATH}\n"
                     "Please set FASTBCP_PATH environment variable correctly."
                 ),
             )
@@ -820,10 +857,26 @@ async def handle_get_version(arguments: Dict[str, Any]) -> list[TextContent]:
     response = [
         "# FastBCP Version Information",
         "",
-        f"**Version**: {version_info['version'] or 'Unknown'}",
-        f"**Detected**: {'Yes' if version_info['detected'] else 'No'}",
-        f"**Binary Path**: {version_info['binary_path']}",
-        "",
+    ]
+
+    if version_info.get("preview_only"):
+        response += [
+            "**Mode**: Preview-only (binary not found)",
+            f"**Binary Path**: {version_info['binary_path']}",
+            f"**Message**: {version_info['message']}",
+            "",
+            "Capabilities below are based on the latest known FastBCP version.",
+            "",
+        ]
+    else:
+        response += [
+            f"**Version**: {version_info['version'] or 'Unknown'}",
+            f"**Detected**: {'Yes' if version_info['detected'] else 'No'}",
+            f"**Binary Path**: {version_info['binary_path']}",
+            "",
+        ]
+
+    response += [
         "## Supported Source Types:",
         ", ".join(f"`{t}`" for t in caps["source_types"]),
         "",
@@ -841,6 +894,7 @@ async def handle_get_version(arguments: Dict[str, Any]) -> list[TextContent]:
         f"- Version Flag: {'Yes' if caps['supports_version_flag'] else 'No'}",
         f"- Cloud Profile: {'Yes' if caps['supports_cloud_profile'] else 'No'}",
         f"- Merge: {'Yes' if caps['supports_merge'] else 'No'}",
+        f"- Config File: {'Yes' if caps['supports_config_file'] else 'No'}",
     ]
 
     return [TextContent(type="text", text="\n".join(response))]

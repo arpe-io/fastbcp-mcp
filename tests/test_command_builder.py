@@ -79,21 +79,61 @@ class TestCommandBuilder:
             builder = CommandBuilder(mock_binary)
         assert builder.binary_path == Path(mock_binary)
 
-    def test_init_with_nonexistent_binary(self):
-        """Test initialization with nonexistent binary fails."""
-        with pytest.raises(FastBCPError) as exc_info:
-            CommandBuilder("/nonexistent/path/FastBCP")
-        assert "not found" in str(exc_info.value)
+    def test_init_with_nonexistent_binary_enters_preview_mode(self):
+        """Test initialization with nonexistent binary enters preview-only mode."""
+        builder = CommandBuilder("/nonexistent/path/FastBCP")
+        assert builder._preview_only is True
 
-    def test_init_with_non_executable_binary(self, tmp_path):
-        """Test initialization with non-executable binary fails."""
+    def test_init_with_non_executable_binary_enters_preview_mode(self, tmp_path):
+        """Test initialization with non-executable binary enters preview-only mode."""
         binary = tmp_path / "FastBCP"
         binary.write_text("not executable")
         binary.chmod(0o644)
 
+        builder = CommandBuilder(str(binary))
+        assert builder._preview_only is True
+
+    def test_preview_only_get_version(self):
+        """Test get_version in preview-only mode returns expected structure."""
+        builder = CommandBuilder("/nonexistent/path/FastBCP")
+        info = builder.get_version()
+        assert info["preview_only"] is True
+        assert info["version"] is None
+        assert info["detected"] is False
+        assert "Binary not found" in info["message"]
+        assert "https://arpe.io" in info["message"]
+        assert "capabilities" in info
+        # Should have capabilities from latest registry entry
+        assert len(info["capabilities"]["source_types"]) > 0
+
+    def test_preview_only_execute_command_raises(self):
+        """Test execute_command raises FastBCPError in preview-only mode."""
+        builder = CommandBuilder("/nonexistent/path/FastBCP")
         with pytest.raises(FastBCPError) as exc_info:
-            CommandBuilder(str(binary))
-        assert "not executable" in str(exc_info.value)
+            builder.execute_command(["test"], timeout=10)
+        assert "preview-only mode" in str(exc_info.value)
+        assert "https://arpe.io" in str(exc_info.value)
+
+    def test_preview_only_build_command_works(self):
+        """Test build_command works in preview-only mode."""
+        builder = CommandBuilder("/nonexistent/path/FastBCP")
+        request = ExportRequest(
+            source={
+                "type": "pgsql",
+                "server": "localhost:5432",
+                "database": "testdb",
+                "table": "users",
+                "user": "user",
+                "password": "pass",
+            },
+            output={
+                "format": "csv",
+                "file_output": "/tmp/output.csv",
+            },
+        )
+        command = builder.build_command(request)
+        assert isinstance(command, list)
+        assert command[0] == "/nonexistent/path/FastBCP"
 
     def test_build_command_basic(self, command_builder, sample_request):
         """Test building a basic export command."""
@@ -609,6 +649,8 @@ class TestCommandBuilder:
         """Test get_version returns structured info."""
         info = command_builder.get_version()
 
+        assert "preview_only" in info
+        assert info["preview_only"] is False
         assert "version" in info
         assert "detected" in info
         assert "binary_path" in info

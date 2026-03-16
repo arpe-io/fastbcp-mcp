@@ -85,15 +85,15 @@ class TestOtherEnums:
     """Tests for other enum types."""
 
     def test_all_parallelism_methods(self):
-        """Test all 9 parallelism method values exist."""
-        assert len(ParallelismMethod) == 9
+        """Test all 10 parallelism method values exist."""
+        assert len(ParallelismMethod) == 10
         assert ParallelismMethod("Ctid") == ParallelismMethod.CTID
         assert ParallelismMethod("None") == ParallelismMethod.NONE
         assert ParallelismMethod("Rowid") == ParallelismMethod.ROWID
 
     def test_all_storage_targets(self):
-        """Test all 6 storage target values exist."""
-        assert len(StorageTarget) == 6
+        """Test all 7 storage target values exist."""
+        assert len(StorageTarget) == 7
         assert StorageTarget("local") == StorageTarget.LOCAL
         assert StorageTarget("s3") == StorageTarget.S3
         assert StorageTarget("azure_blob") == StorageTarget.AZURE_BLOB

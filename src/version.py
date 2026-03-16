@@ -80,6 +80,7 @@ class VersionCapabilities:
     supports_version_flag: bool = False
     supports_cloud_profile: bool = False
     supports_merge: bool = False
+    supports_config_file: bool = False
 
 
 # Static version registry: version string -> capabilities
@@ -141,6 +142,67 @@ VERSION_REGISTRY: Dict[str, VersionCapabilities] = {
         supports_version_flag=True,
         supports_cloud_profile=True,
         supports_merge=True,
+    ),
+    "0.30.0.0": VersionCapabilities(
+        source_types=frozenset(
+            [
+                "clickhouse",
+                "hana",
+                "mssql",
+                "msoledbsql",
+                "mysql",
+                "nzcopy",
+                "nzoledb",
+                "nzsql",
+                "odbc",
+                "oledb",
+                "oraodp",
+                "pgcopy",
+                "pgsql",
+                "teradata",
+            ]
+        ),
+        output_formats=frozenset(
+            [
+                "csv",
+                "tsv",
+                "json",
+                "bson",
+                "parquet",
+                "xlsx",
+                "binary",
+            ]
+        ),
+        parallelism_methods=frozenset(
+            [
+                "Ctid",
+                "DataDriven",
+                "Ntile",
+                "NZDataSlice",
+                "None",
+                "Physloc",
+                "Random",
+                "RangeId",
+                "Rowid",
+                "Timepartition",
+            ]
+        ),
+        storage_targets=frozenset(
+            [
+                "local",
+                "s3",
+                "s3compatible",
+                "azure_blob",
+                "azure_datalake",
+                "fabric_onelake",
+                "gcs",
+            ]
+        ),
+        supports_nobanner=True,
+        supports_version_flag=True,
+        supports_cloud_profile=True,
+        supports_merge=True,
+        supports_config_file=True,
     ),
 }
 
