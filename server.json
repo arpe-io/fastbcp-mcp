@@ -6,19 +6,19 @@
     "url": "https://github.com/arpe-io/fastbcp-mcp",
     "source": "github"
   },
-  "version": "0.1.4",
+  "version": "0.1.5",
   "packages": [
     {
       "registryType": "pypi",
       "identifier": "fastbcp-mcp",
-      "version": "0.1.4",
+      "version": "0.1.5",
       "transport": {
         "type": "stdio"
       },
       "environmentVariables": [
         {
-          "description": "Path to the FastBCP binary",
-          "isRequired": true,
+          "description": "Path to the FastBCP binary (optional — server runs in preview-only mode without it)",
+          "isRequired": false,
           "format": "string",
           "isSecret": false,
           "name": "FASTBCP_PATH"
