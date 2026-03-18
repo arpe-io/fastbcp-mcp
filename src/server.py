@@ -84,10 +84,10 @@ app = Server("fastbcp")
 try:
     command_builder = CommandBuilder(FASTBCP_PATH)
     if command_builder._preview_only:
-        logger.warning(
-            f"FastBCP binary not found at: {FASTBCP_PATH}. "
-            "Server running in preview-only mode. "
-            "Install the binary from https://arpe.io to enable execution."
+        logger.info(
+            f"FastBCP binary not configured (path: {FASTBCP_PATH}). "
+            "Command building and preview tools are available. "
+            "Download from https://arpe.io and set FASTBCP_PATH to enable execution."
         )
     else:
         version_info = command_builder.get_version()
@@ -310,6 +310,12 @@ async def list_tools() -> list[Tool]:
                         "type": "string",
                         "description": "Path to a YAML configuration file (--config parameter, requires FastBCP 0.30+)",
                     },
+                    "os_type": {
+                        "type": "string",
+                        "enum": ["linux", "windows"],
+                        "description": "Target operating system for command formatting",
+                        "default": "linux",
+                    },
                 },
                 "required": ["source", "output"],
             },
@@ -477,8 +483,9 @@ async def handle_preview_export(arguments: Dict[str, Any]) -> list[TextContent]:
         ]
 
     try:
-        # Extract config_file before passing to ExportRequest (not part of the model)
+        # Extract config_file and os_type before passing to ExportRequest (not part of the model)
         config_file = arguments.pop("config_file", None)
+        os_type = arguments.pop("os_type", "linux")
 
         # Validate and parse request
         request = ExportRequest(**arguments)
@@ -494,7 +501,7 @@ async def handle_preview_export(arguments: Dict[str, Any]) -> list[TextContent]:
         command = command_builder.build_command(request, config_file=config_file)
 
         # Format for display (with masked passwords)
-        display_command = command_builder.format_command_display(command, mask=True)
+        display_command = command_builder.format_command_display(command, mask=True, os_type=os_type)
 
         # Create explanation
         explanation = _build_export_explanation(request)
@@ -507,10 +514,8 @@ async def handle_preview_export(arguments: Dict[str, Any]) -> list[TextContent]:
 
         if command_builder._preview_only:
             response += [
-                "**NOTE: Server is in preview-only mode** (binary not found at "
-                f"{command_builder.binary_path}). "
-                "Command preview is available but execution is disabled. "
-                "Install the binary from https://arpe.io to enable execution.",
+                "**NOTE: Execution is not available (binary not configured).** "
+                "Download from https://arpe.io to enable execution.",
                 "",
             ]
 
@@ -582,8 +587,8 @@ async def handle_execute_export(arguments: Dict[str, Any]) -> list[TextContent]:
             TextContent(
                 type="text",
                 text=(
-                    f"Server is in preview-only mode (binary not found at {command_builder.binary_path}). "
-                    "Install the binary from https://arpe.io to enable execution."
+                    "Execution requires the FastBCP binary. "
+                    "Download from https://arpe.io and set FASTBCP_PATH."
                 ),
             )
         ]
@@ -861,7 +866,7 @@ async def handle_get_version(arguments: Dict[str, Any]) -> list[TextContent]:
 
     if version_info.get("preview_only"):
         response += [
-            "**Mode**: Preview-only (binary not found)",
+            "**Mode**: Command builder (execution not available)",
             f"**Binary Path**: {version_info['binary_path']}",
             f"**Message**: {version_info['message']}",
             "",

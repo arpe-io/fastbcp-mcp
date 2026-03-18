@@ -100,7 +100,7 @@ class TestCommandBuilder:
         assert info["preview_only"] is True
         assert info["version"] is None
         assert info["detected"] is False
-        assert "Binary not found" in info["message"]
+        assert "Set binary path" in info["message"]
         assert "https://arpe.io" in info["message"]
         assert "capabilities" in info
         # Should have capabilities from latest registry entry
@@ -111,7 +111,7 @@ class TestCommandBuilder:
         builder = CommandBuilder("/nonexistent/path/FastBCP")
         with pytest.raises(FastBCPError) as exc_info:
             builder.execute_command(["test"], timeout=10)
-        assert "preview-only mode" in str(exc_info.value)
+        assert "Execution requires" in str(exc_info.value)
         assert "https://arpe.io" in str(exc_info.value)
 
     def test_preview_only_build_command_works(self):
